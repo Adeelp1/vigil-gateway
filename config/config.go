@@ -15,6 +15,10 @@ type Config struct {
 	ReadTimeout     time.Duration // max time to read a full request
 	WriteTimeout    time.Duration // max time to write a full response
 	ShutdownTimeout time.Duration // graceful drain window
+	RedisAddr       string
+	RedisPassword   string
+	RedisDB         int
+	RedisProtocol   int
 }
 
 func Load() Config {
@@ -25,6 +29,10 @@ func Load() Config {
 		ReadTimeout:     getEnvDuration("READ_TIMEOUT", time.Duration(10*time.Second)),
 		WriteTimeout:    getEnvDuration("WRITE_TIMEOUT", time.Duration(10*time.Second)),
 		ShutdownTimeout: getEnvDuration("SHUTDOWNTIMEOUT", time.Duration(30*time.Second)),
+		RedisAddr:       getEnv("REDIS_ADDR", "localhost:6379"),
+		RedisPassword:   getEnv("REDIS_PASSWORD", ""),
+		RedisDB:         getEnvInt("REDIS_DB", 0),
+		RedisProtocol:   getEnvInt("REDIS_PROTOCOL", 3),
 	}
 }
 

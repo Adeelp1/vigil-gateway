@@ -9,6 +9,7 @@ import (
 
 	"github.com/Adeelp1/vigil-gateway/config"
 	"github.com/Adeelp1/vigil-gateway/internal/proxy"
+	"github.com/Adeelp1/vigil-gateway/internal/store"
 )
 
 func main() {
@@ -20,7 +21,9 @@ func main() {
 
 	cfg := config.Load()
 
-	srv, err := proxy.New(cfg)
+	rdb := store.NewRedisClient(cfg)
+
+	srv, err := proxy.New(cfg, rdb)
 	if err != nil {
 		slog.Error("failed to start server", "err", err)
 		os.Exit(1)

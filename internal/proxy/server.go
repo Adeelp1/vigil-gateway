@@ -11,6 +11,7 @@ import (
 
 	"github.com/Adeelp1/vigil-gateway/config"
 	"github.com/Adeelp1/vigil-gateway/internal/middleware"
+	"github.com/Adeelp1/vigil-gateway/internal/store"
 )
 
 // Server owns the TCP listener and the worker pool. It deliberately does NOT
@@ -29,7 +30,7 @@ type Server struct {
 	sem chan struct{}
 }
 
-func New(cfg config.Config) (*Server, error) {
+func New(cfg config.Config, rdb store.Redis) (*Server, error) {
 	// Build the final upstream handler.
 	upstream := NewHandler(cfg.UpstreamAddr, cfg.ReadTimeout, cfg.WriteTimeout)
 
@@ -37,6 +38,7 @@ func New(cfg config.Config) (*Server, error) {
 	chain := middleware.Chain(
 		middleware.RequestID,
 		middleware.Logger,
+		middleware.ThreatCheck(rdb),
 	)(upstream)
 
 	l, err := net.Listen("tcp", cfg.ListenAddr)
