@@ -19,6 +19,9 @@ type Config struct {
 	RedisPassword   string
 	RedisDB         int
 	RedisProtocol   int
+	JWTSecret       string
+	RateLimitRPS    int
+	RateLimitBurst  int
 }
 
 func Load() Config {
@@ -33,6 +36,9 @@ func Load() Config {
 		RedisPassword:   getEnv("REDIS_PASSWORD", ""),
 		RedisDB:         getEnvInt("REDIS_DB", 0),
 		RedisProtocol:   getEnvInt("REDIS_PROTOCOL", 3),
+		JWTSecret:       getEnv("JWT_SECRET", ""),
+		RateLimitRPS:    getEnvInt("RATE_LIMIT_RPS", 10),
+		RateLimitBurst:  getEnvInt("RATE_LIMIT_BURST", 100),
 	}
 }
 

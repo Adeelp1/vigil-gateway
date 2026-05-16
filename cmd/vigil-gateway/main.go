@@ -10,9 +10,14 @@ import (
 	"github.com/Adeelp1/vigil-gateway/config"
 	"github.com/Adeelp1/vigil-gateway/internal/proxy"
 	"github.com/Adeelp1/vigil-gateway/internal/store"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		slog.Warn("No .env file found, relying on environment variables")
+	}
 	// Structured JSON logging in production; pretty text in development.
 	// Switch the handler based on an env var.
 	if os.Getenv("LOG_FORMAT") == "json" {
@@ -20,6 +25,11 @@ func main() {
 	}
 
 	cfg := config.Load()
+
+	if cfg.JWTSecret == "" {
+		slog.Error("JWT_SECRET is required")
+		os.Exit(1)
+	}
 
 	rdb := store.NewRedisClient(cfg)
 

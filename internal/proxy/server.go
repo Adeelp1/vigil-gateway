@@ -38,7 +38,9 @@ func New(cfg config.Config, rdb store.Redis) (*Server, error) {
 	chain := middleware.Chain(
 		middleware.RequestID,
 		middleware.Logger,
+		middleware.JWTAuth(cfg),
 		middleware.ThreatCheck(rdb),
+		middleware.RateLimiter(cfg),
 	)(upstream)
 
 	l, err := net.Listen("tcp", cfg.ListenAddr)
