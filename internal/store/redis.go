@@ -13,7 +13,7 @@ import (
 )
 
 type Redis struct {
-	client *redis.Client
+	Client *redis.Client
 }
 
 type ScoreRecord struct {
@@ -25,7 +25,7 @@ var scoreKey string = "vigil:score:"
 
 func NewRedisClient(cfg config.Config) Redis {
 	return Redis{
-		client: redis.NewClient(
+		Client: redis.NewClient(
 			&redis.Options{
 				Addr:     cfg.RedisAddr,
 				Password: cfg.RedisPassword,
@@ -41,7 +41,7 @@ func NewRedisClient(cfg config.Config) Redis {
 func (rdb *Redis) Store(ctx context.Context, ip string, score float64) error {
 	value := fmt.Sprintf("%f|%d", score, time.Now().Unix())
 
-	err := rdb.client.Set(ctx, scoreKey+ip, value, 30*time.Minute).Err()
+	err := rdb.Client.Set(ctx, scoreKey+ip, value, 30*time.Minute).Err()
 	if err != nil {
 		slog.Error("redis store failed", "ip", ip, "err", err)
 		return err
@@ -52,7 +52,7 @@ func (rdb *Redis) Store(ctx context.Context, ip string, score float64) error {
 // Get retrieves and parses the score record for an IP.
 // Returns redis.Nil error if the key doesn't exist (client is new/clean).
 func (rdb *Redis) Get(ctx context.Context, ip string) (ScoreRecord, error) {
-	val, err := rdb.client.Get(ctx, scoreKey+ip).Result()
+	val, err := rdb.Client.Get(ctx, scoreKey+ip).Result()
 	if err != nil {
 		return ScoreRecord{}, err
 	}

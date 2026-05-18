@@ -22,6 +22,9 @@ type Config struct {
 	JWTSecret       string
 	RateLimitRPS    int
 	RateLimitBurst  int
+	StreamKey       string
+	StreamGroup     string
+	StreamMaxLen    int
 }
 
 func Load() Config {
@@ -39,6 +42,9 @@ func Load() Config {
 		JWTSecret:       getEnv("JWT_SECRET", ""),
 		RateLimitRPS:    getEnvInt("RATE_LIMIT_RPS", 10),
 		RateLimitBurst:  getEnvInt("RATE_LIMIT_BURST", 100),
+		StreamKey:       getEnv("STREAM_KEY", "vigil:events"),
+		StreamGroup:     getEnv("STREAM_GROUP", "ml-workers"),
+		StreamMaxLen:    getEnvInt("STREAM_MAX_LEN", 10000),
 	}
 }
 

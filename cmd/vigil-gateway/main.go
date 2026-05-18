@@ -25,6 +25,10 @@ func main() {
 	}
 
 	cfg := config.Load()
+	slog.Info("config loaded",
+		"stream_key", cfg.StreamKey,
+		"jwt_secret_set", cfg.JWTSecret != "",
+	)
 
 	if cfg.JWTSecret == "" {
 		slog.Error("JWT_SECRET is required")

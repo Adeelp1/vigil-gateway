@@ -33,3 +33,4 @@ go.work.sum
 
 upstream_test/
 tools/
+venv/

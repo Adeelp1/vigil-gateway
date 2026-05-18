@@ -1,9 +1,15 @@
 package middleware
 
 import (
+	"context"
 	"log/slog"
+	"net"
 	"net/http"
 	"time"
+
+	"github.com/Adeelp1/vigil-gateway/config"
+	"github.com/Adeelp1/vigil-gateway/internal/store"
+	"github.com/Adeelp1/vigil-gateway/internal/stream"
 )
 
 // responseRecorder wraps http.ResponseWritter to capture the status and
@@ -33,21 +39,38 @@ func (r *responseRecorder) Write(b []byte) (int, error) {
 }
 
 // Logger emits a structured log line for every request using the stdlib
-func Logger(next Handler) Handler {
-	return HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		rec := newResponseRecorder(w)
+func Logger(cfg config.Config, rdb store.Redis) Middleware {
+	return func(next Handler) Handler {
+		return HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			start := time.Now()
+			rec := newResponseRecorder(w)
 
-		next.ServeHTTP(rec, r)
+			next.ServeHTTP(rec, r)
 
-		slog.Info("request",
-			"id", GetRequestID(r.Context()),
-			"method", r.Method,
-			"path", r.URL.Path,
-			"status", rec.statusCode,
-			"bytes", rec.bytesWritten,
-			"remote", r.RemoteAddr,
-			"duration_ms", time.Since(start).Milliseconds(),
-		)
-	})
+			ip, _, _ := net.SplitHostPort(r.RemoteAddr)
+
+			go func() {
+				stream.Publish(context.Background(), rdb, cfg, stream.Event{
+					IP:         ip,
+					Sub:        GetJWTSubject(r.Context()),
+					Method:     r.Method,
+					Path:       r.URL.Path,
+					Status:     rec.statusCode,
+					DurationMS: time.Since(start).Milliseconds(),
+					UserAgent:  r.Header.Get("User-Agent"),
+					Timestamp:  time.Now().Unix(),
+				})
+			}()
+
+			slog.Info("request",
+				"id", GetRequestID(r.Context()),
+				"method", r.Method,
+				"path", r.URL.Path,
+				"status", rec.statusCode,
+				"bytes", rec.bytesWritten,
+				"remote", r.RemoteAddr,
+				"duration_ms", time.Since(start).Milliseconds(),
+			)
+		})
+	}
 }

@@ -41,11 +41,3 @@ func generateID() string {
 	}
 	return hex.EncodeToString(b)
 }
-
-// GetRequestID retrieves the request ID from context, returning "" if absent.
-func GetRequestID(ctx context.Context) string {
-	if id, ok := ctx.Value(RequestIDKey).(string); ok {
-		return id
-	}
-	return ""
-}

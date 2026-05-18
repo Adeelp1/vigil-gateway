@@ -37,8 +37,8 @@ func New(cfg config.Config, rdb store.Redis) (*Server, error) {
 	// Compose the middleware chain (outermost first = first to run)
 	chain := middleware.Chain(
 		middleware.RequestID,
-		middleware.Logger,
 		middleware.JWTAuth(cfg),
+		middleware.Logger(cfg, rdb),
 		middleware.ThreatCheck(rdb),
 		middleware.RateLimiter(cfg),
 	)(upstream)
