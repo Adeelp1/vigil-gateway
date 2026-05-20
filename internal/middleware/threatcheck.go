@@ -52,9 +52,6 @@ func ThreatCheck(rbd store.Redis) Middleware {
 				slog.Error("tier", "unknown tier", tier)
 				return
 			}
-
-			newScore := scoring.RunningAverage(record.Score, decayed)
-			rbd.Store(r.Context(), ip, newScore)
 		})
 
 	}
